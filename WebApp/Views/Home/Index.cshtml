@@ -1,33 +1,105 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "臺北市即時交通訊息";
 }
 
-<main>
-    <section class="row" aria-labelledby="aspnetTitle">
-        <h1 id="title">ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="https://asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
-    </section>
+<style>
+    tbody td {
+        word-break: break-all;
+        min-width: 90px;
+        max-width: 200px;
+    }
+</style>
 
-    <div class="row">
-        <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-            <h2 id="gettingStartedTitle">Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="librariesTitle">
-            <h2 id="librariesTitle">Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </section>
-        <section class="col-md-4" aria-labelledby="hostingTitle">
-            <h2 id="hostingTitle">Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-outline-dark" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-        </section>
+<div class="row">
+    <div class="col-xs-12">
+        <h1>臺北市即時交通訊息</h1>
     </div>
-</main>
+    <div class="col-xs-12">
+        <div id="Alert" class="alert alert-danger" role="alert" style="display:none;"></div>
+        <table id="dataTable" class="table table-bordered table-hover">
+            <thead class="table">
+                <tr>
+                    <th>中文訊息</th>
+                    <th>英文訊息</th>
+                    <th>開始時間</th>
+                    <th>結束時間</th>
+                    <th>更新時間</th>
+                    <th>內容</th>
+                    <th>連結網址</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="NoData">
+                    <td class="text-center" colspan="7">無資料</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+
+    function ShowAlert(message) {
+        var alert = document.getElementById("Alert");
+        alert.innerHTML = message;
+        alert.style.display = "block";
+    }
+
+    function GetDBData() {
+        fetch('@Url.Action("GetApiDataLists", "NewsApi")')
+            .then(function (response) {
+                console.log(87);
+                return response.json();
+            })            
+            .then(function (result) {
+                if (result.Success) {
+
+                    if (result.Data.length > 0) {
+                        //有資料，隱藏無資料行
+                        document.getElementById("NoData").hidden = true;
+
+                        var tbody = document.getElementsByTagName("tbody")[0];
+                        for (let i = 0; i < result.Data.length; i++) {
+                            var tr = document.createElement("tr");
+                            for (let attr of Object.keys(result.Data[i])) {
+                                var td = document.createElement("td");
+                                if (attr == 'url' && result.Data[i][attr]) {
+                                    var url = document.createElement("a");
+                                    url.setAttribute('href', result.Data[i][attr]);
+                                    url.innerHTML = "點我";
+                                    url.classList.add("link-primary");
+                                    td.append(url);
+                                }
+                                else if (attr == 'content' && result.Data[i][attr].length > 40) {
+                                    var view = document.createElement("a");
+                                    view.innerHTML = "查看更多"
+                                    view.classList.add("link-secondary");
+                                    view.setAttribute('onclick', "alert('" + result.Data[i][attr] + "')");
+                                    td.append(result.Data[i][attr].substring(0, 40) + " .... ");
+                                    td.append(view);
+                                }
+                                else {
+                                    td.innerHTML = result.Data[i][attr];
+                                }
+                                tr.append(td);
+                            }
+                            tbody.append(tr);
+                        }
+                    }
+                    else {
+                        ShowAlert("API存取成功但無資料");
+                    }
+                }
+                else {
+                    ShowAlert(result.Message);
+                }
+            })
+            .catch((error) => {
+                console.log(`Error: ${error}`);
+            })
+    }
+
+    window.onload = function () {
+        GetDBData();
+    }
+</script>
