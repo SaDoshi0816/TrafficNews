@@ -41,25 +41,22 @@ namespace WebApp.Controllers
                     HttpResponseMessage response = await client.GetAsync(new Uri(NewsApiUrl));
                     response.EnsureSuccessStatusCode();
 
+                    //HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, NewsApiUrl);
+                    //var response = await client.SendAsync(httpRequest);
+ 
                     string responseBody = await response.Content.ReadAsStringAsync();
                     responseBody = responseBody.Replace("\r\n", string.Empty);
                     var data = JsonConvert.DeserializeObject<NewsApiModel>(responseBody);
 
                     if (data.News.Count > 0)
                     {
-                        result.Data = data.News;
-
-                        data.News.ForEach(x => 
-                            { 
-                                x.starttime = FormatDateTimeString(x.starttime);
-                                x.endtime = FormatDateTimeString(x.endtime);
-                                x.updatetime = FormatDateTimeString(x.updatetime);
-                            });
-
-
-                        //_NewsApiService.InsertData(result.Data);
+                        result = _NewsApiService.InsertData(data.News);
                     }
-                    result.Success = true;
+                    else
+                    {
+                        result.Success = true;
+                        result.Message = "Api存取成功，尚無回傳資料";
+                    } 
                 }
                 catch (Exception ex)
                 {
@@ -69,19 +66,6 @@ namespace WebApp.Controllers
             }
 
             return Json(result, JsonRequestBehavior.AllowGet);
-        }
-
-
-        public string FormatDateTimeString(string str)
-        {
-            string dateTime = "--";
-            if (!string.IsNullOrEmpty(str) && str.Length == 14)
-            {
-                string date = str.Substring(0, 4) + "/" + str.Substring(4, 2) + "/" + str.Substring(6, 2);
-                string time = str.Substring(8, 2) + ":" + str.Substring(10, 2) + ":" + str.Substring(12, 2);
-                dateTime = date + "<br/>" + time;
-            }
-            return dateTime;
         }
     }
 }

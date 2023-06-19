@@ -11,8 +11,6 @@ namespace WebApp.Controllers
     {
         public ActionResult Index()
         {
-            //var response = new NewsApiService().GetApiDataList();
-
             return View();
         }
 

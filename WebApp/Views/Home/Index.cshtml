@@ -12,87 +12,123 @@
 
 <div class="row">
     <div class="col-xs-12">
-        <h1>臺北市即時交通訊息</h1>
+        <h1>臺北市即時交通訊息</h1>        
     </div>
-    <div class="col-xs-12">
-        <div id="Alert" class="alert alert-danger" role="alert" style="display:none;"></div>
-        <table id="dataTable" class="table table-bordered table-hover">
-            <thead class="table">
-                <tr>
-                    <th>中文訊息</th>
-                    <th>英文訊息</th>
-                    <th>開始時間</th>
-                    <th>結束時間</th>
-                    <th>更新時間</th>
-                    <th>內容</th>
-                    <th>連結網址</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr id="NoData">
-                    <td class="text-center" colspan="7">無資料</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="row">
+        <div class="col-4">
+            <button type="button" class="btn btn-primary btn-lg m-1" onclick="GetApiData();">取api資料並儲存</button>
+            <button id="Clear" type="button" class="btn btn-outline-secondary btn-lg m-1" onclick="ClearTable();">清除</button>
+        </div>
+        <div class="col-8">
+            <div id="Alert" class="alert" role="alert" style="display:none;"></div>
+        </div>
     </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <table id="dataTable" class="table table-bordered table-hover">
+                <thead class="table">
+                    <tr>
+                        <th>中文訊息</th>
+                        <th>英文訊息</th>
+                        <th>開始時間</th>
+                        <th>結束時間</th>
+                        <th>更新時間</th>
+                        <th>內容</th>
+                        <th>連結網址</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="NoData">
+                        <td class="text-center" colspan="7">無資料</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>   
 </div>
 
 <script>
-
-    function ShowAlert(message) {
+    function ShowAlert(success, message) {
         var alert = document.getElementById("Alert");
-        alert.innerHTML = message;
+        alert.classList.remove("alert-danger", "alert-success");        
+        alert.innerHTML = message;        
         alert.style.display = "block";
+        if (success) {
+            alert.classList.add("alert-success");
+            setTimeout(HideAlert, 3000);
+        }
+        else {
+            alert.classList.add("alert-danger");
+        }
     }
 
-    function GetDBData() {
+    function HideAlert() {
+        var alert = document.getElementById("Alert");
+        alert.classList.remove("alert-danger", "alert-success");
+        alert.style.display = "none";
+    }
+
+    function ClearTable() {
+        //清除tbody內容
+        var tbody = document.getElementsByTagName("tbody")[0];
+        tbody.innerHTML = "";
+
+        //顯示無資料行
+        var tr = document.createElement("tr");
+        tr.setAttribute("id", "NoData");
+        var td = document.createElement("td");
+        td.setAttribute("colspan", 7);
+        td.classList.add("text-center");
+        td.innerHTML = "無資料";
+        tr.append(td);
+        tbody.append(tr);
+
+        //清除提示
+        HideAlert();
+    }
+
+    function GetApiData() {
         fetch('@Url.Action("GetApiDataLists", "NewsApi")')
             .then(function (response) {
-                console.log(87);
                 return response.json();
             })            
             .then(function (result) {
-                if (result.Success) {
+                if (result.Data.length > 0) {
+                    //隱藏無資料行
+                    var noData = document.getElementById("NoData");
+                    if (noData) {
+                        noData.hidden = true;
+                    }
 
-                    if (result.Data.length > 0) {
-                        //有資料，隱藏無資料行
-                        document.getElementById("NoData").hidden = true;
-
-                        var tbody = document.getElementsByTagName("tbody")[0];
-                        for (let i = 0; i < result.Data.length; i++) {
-                            var tr = document.createElement("tr");
-                            for (let attr of Object.keys(result.Data[i])) {
-                                var td = document.createElement("td");
-                                if (attr == 'url' && result.Data[i][attr]) {
-                                    var url = document.createElement("a");
-                                    url.setAttribute('href', result.Data[i][attr]);
-                                    url.innerHTML = "點我";
-                                    url.classList.add("link-primary");
-                                    td.append(url);
-                                }
-                                else if (attr == 'content' && result.Data[i][attr].length > 40) {
-                                    var view = document.createElement("a");
-                                    view.innerHTML = "查看更多"
-                                    view.classList.add("link-secondary");
-                                    view.setAttribute('onclick', "alert('" + result.Data[i][attr] + "')");
-                                    td.append(result.Data[i][attr].substring(0, 40) + " .... ");
-                                    td.append(view);
-                                }
-                                else {
-                                    td.innerHTML = result.Data[i][attr];
-                                }
-                                tr.append(td);
+                    var tbody = document.getElementsByTagName("tbody")[0];
+                    for (let i = 0; i < result.Data.length; i++) {
+                        var tr = document.createElement("tr");
+                        for (let attr of Object.keys(result.Data[i])) {
+                            var td = document.createElement("td");
+                            if (attr == 'url' && result.Data[i][attr]) {
+                                var url = document.createElement("a");
+                                url.setAttribute('href', result.Data[i][attr]);
+                                url.innerHTML = "前往連結";
+                                url.classList.add("link-primary");
+                                td.append(url);
                             }
-                            tbody.append(tr);
+                            else if (attr == 'content' && result.Data[i][attr].length > 40) {
+                                var view = document.createElement("a");
+                                view.innerHTML = "查看更多"
+                                view.classList.add("link-secondary");
+                                view.setAttribute('onclick', "alert('" + result.Data[i][attr] + "')");
+                                td.append(result.Data[i][attr].substring(0, 40) + " .... ");
+                                td.append(view);
+                            }
+                            else {
+                                td.innerHTML = result.Data[i][attr];
+                            }
+                            tr.append(td);
                         }
-                    }
-                    else {
-                        ShowAlert("API存取成功但無資料");
+                        tbody.append(tr);
                     }
                 }
-                else {
-                    ShowAlert(result.Message);
-                }
+                ShowAlert(result.Success, result.Message);
             })
             .catch((error) => {
                 console.log(`Error: ${error}`);
@@ -100,6 +136,6 @@
     }
 
     window.onload = function () {
-        GetDBData();
+
     }
 </script>

@@ -34,10 +34,16 @@ namespace WebApp.Repositories
                                         @starttime, @endtime, @updatetime, 
                                         @content, @url
                                       ) ";
+            try
+            {
+                int i = _conn.Execute(sql, dataList);
 
-            int i = _conn.Execute(sql, dataList);
-
-            return i > 0;
+                return i > 0;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }            
         }
     }
 }
