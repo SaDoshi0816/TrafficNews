@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csp
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "TrafficNewsDB", "TrafficNewsDB\TrafficNewsDB.sqlproj", "{AC6D7158-E40F-420A-8F3B-9512A8362E76}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.Tests", "WebApp.Tests\WebApp.Tests.csproj", "{9304F3DF-628D-42F5-BD9A-7C7BF7974664}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{AC6D7158-E40F-420A-8F3B-9512A8362E76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC6D7158-E40F-420A-8F3B-9512A8362E76}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AC6D7158-E40F-420A-8F3B-9512A8362E76}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{9304F3DF-628D-42F5-BD9A-7C7BF7974664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9304F3DF-628D-42F5-BD9A-7C7BF7974664}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9304F3DF-628D-42F5-BD9A-7C7BF7974664}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9304F3DF-628D-42F5-BD9A-7C7BF7974664}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

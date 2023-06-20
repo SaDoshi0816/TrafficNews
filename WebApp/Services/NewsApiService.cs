@@ -26,17 +26,33 @@ namespace WebApp.Services
 
         public NewsApiResponse InsertData(List<NewsDataModel> dataList)
         {
-            var result = new NewsApiResponse();
-            if (_NewsRepository.InsertNewsData(dataList))
+            var result = new NewsApiResponse()
             {
-                result.Success = true;
-                result.Message = "儲存成功";                
-            }
-            else
+                Success = true
+            };
+
+            if (dataList.Any(x => string.IsNullOrEmpty(x.starttime) || x.starttime.Length != 14))
             {
                 result.Success = false;
-                result.Message = "Api存取成功，但資料庫儲存失敗";
+                result.Message = "Api存取成功，但開始時間資料格式錯誤";
             }
+
+            //儲存資料
+            if (result.Success)
+            {
+                if (_NewsRepository.InsertNewsData(dataList))
+                {
+                    result.Success = true;
+                    result.Message = "儲存成功";
+                }
+                else
+                {
+                    result.Success = false;
+                    result.Message = "Api存取成功，但資料庫儲存失敗";
+                }                
+            }
+
+            //轉換格式
             result.Data = TransferViewModel(dataList);
 
             return result;
@@ -64,41 +80,6 @@ namespace WebApp.Services
                 dateTime = date + "<br/>" + time;
             }
             return dateTime;
-        }
-
-        public async Task<NewsApiResponse> GetApiDataList(int timeout = 10)
-        {
-            var result = new NewsApiResponse();
-
-            using (HttpClient client = new HttpClient())
-            {
-                try
-                {
-                    client.Timeout = TimeSpan.FromSeconds(timeout);
-                    HttpResponseMessage response = await client.GetAsync(new Uri(NewsApiUrl));
-                    response.EnsureSuccessStatusCode();
-
-                    //HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, NewsApiUrl);
-                    //var response = await client.SendAsync(httpRequest);
-
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    responseBody = responseBody.Replace("\r\n", string.Empty);
-                    var data = JsonConvert.DeserializeObject<NewsApiModel>(responseBody);
-
-                    if (data.News.Count > 0)
-                    {
-                        result.Data = data.News;
-                    }
-                    result.Success = true;
-                }
-                catch (Exception e)
-                {
-                    result.Success = false;
-                    result.Message = "存取api失敗";
-                }
-            }
-
-            return result;
         }
     }
 }

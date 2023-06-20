@@ -21,13 +21,6 @@ namespace WebApp.Controllers
             _NewsApiService = new NewsApiService();
         }
 
-        public JsonResult GetApiDataList()
-        {
-            var result = _NewsApiService.GetApiDataList();
-
-            return Json(result, JsonRequestBehavior.AllowGet);
-        }
-
         public async Task<JsonResult> GetApiDataLists()
         {
             var result = new NewsApiResponse();
@@ -41,9 +34,6 @@ namespace WebApp.Controllers
                     HttpResponseMessage response = await client.GetAsync(new Uri(NewsApiUrl));
                     response.EnsureSuccessStatusCode();
 
-                    //HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Get, NewsApiUrl);
-                    //var response = await client.SendAsync(httpRequest);
- 
                     string responseBody = await response.Content.ReadAsStringAsync();
                     responseBody = responseBody.Replace("\r\n", string.Empty);
                     var data = JsonConvert.DeserializeObject<NewsApiModel>(responseBody);
